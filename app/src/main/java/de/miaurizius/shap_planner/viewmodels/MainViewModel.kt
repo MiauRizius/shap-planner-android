@@ -1,5 +1,8 @@
 package de.miaurizius.shap_planner.viewmodels
 
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import de.miaurizius.shap_planner.entities.Account
@@ -23,5 +26,14 @@ class MainViewModel(private val accountDao: AccountDao) : ViewModel() {
         }
     }
 
-    fun selectAccount(account: Account) {}
+    var selectedAccount by mutableStateOf<Account?>(null)
+        private set
+
+    fun selectAccount(account: Account) {
+        selectedAccount = account
+    }
+
+    fun logoutFromAccount() {
+        selectedAccount = null
+    }
 }

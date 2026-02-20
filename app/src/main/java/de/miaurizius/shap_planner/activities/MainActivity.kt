@@ -15,6 +15,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -58,26 +59,37 @@ class MainActivity : ComponentActivity() {
 
         setContent {
             ShapPlannerTheme {
-                LaunchedEffect(Unit) {
-                    mainViewModel.addAccount(Account(UUID.randomUUID(), "MiauRizius", "Pfadi-WG"))
-                }
-
                 val isLoggedIn by loginViewModel.isLoggedIn.collectAsState()
-                val accountList by mainViewModel.accounts.collectAsState() // Lädt aus Room
+                val accountList by mainViewModel.accounts.collectAsState()
+                val selectedAccount = mainViewModel.selectedAccount
 
-                if (isLoggedIn) {
-                    if (accountList.isEmpty()) {
-                        // Zeige Button "Ersten Account erstellen"
-                    } else {
+                when {
+                    !isLoggedIn || accountList.isEmpty() -> {
+                        LoginScreen { userId ->
+                            val acc = Account(userId, "MiauRizius", "Pfadi-WG") //TODO: get data from backend
+                            mainViewModel.addAccount(acc)
+                            loginViewModel.login(acc.id.toString())
+                        }
+                    }
+
+                    selectedAccount != null -> {
+                        DashboardScreen(
+                            account = selectedAccount,
+                            onBack = { mainViewModel.logoutFromAccount() }
+                        )
+                    }
+
+                    else -> {
                         AccountSelectionScreen(
                             accounts = accountList,
                             onAccountClick = { account ->
                                 mainViewModel.selectAccount(account)
+                            },
+                            onAddAccountClick = {
+                                loginViewModel.logout()
                             }
                         )
                     }
-                } else {
-                    LoginScreen { userId -> loginViewModel.login(userId) }
                 }
             }
         }
@@ -85,9 +97,9 @@ class MainActivity : ComponentActivity() {
 }
 
 @Composable
-fun AccountSelectionScreen(accounts: List<Account>, onAccountClick: (Account) -> Unit) {
+fun AccountSelectionScreen(accounts: List<Account>, onAccountClick: (Account) -> Unit, onAddAccountClick: () -> Unit) {
     LazyColumn(
-        modifier = Modifier.fillMaxSize().padding(16.dp),
+        modifier = Modifier.fillMaxSize().padding(16.dp).statusBarsPadding(),
         verticalArrangement = Arrangement.spacedBy(12.dp)
     ) {
         item {
@@ -106,14 +118,23 @@ fun AccountSelectionScreen(accounts: List<Account>, onAccountClick: (Account) ->
                 }
             }
         }
+        item {
+            Spacer(modifier = Modifier.height(8.dp))
+            Button(
+                onClick = onAddAccountClick,
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Text("Anderen Account hinzufügen")
+            }
+        }
     }
 }
 
 @Composable
-fun LoginScreen(onLogin: (String) -> Unit) {
+fun LoginScreen(onLogin: (UUID) -> Unit) {
     var userId by remember { mutableStateOf("") }
 
-    Column(modifier = Modifier.padding(16.dp)) {
+    Column(modifier = Modifier.padding(16.dp).statusBarsPadding()) {
         Text("Bitte anmelden")
         Spacer(modifier = Modifier.height(8.dp))
         TextField(
@@ -122,8 +143,43 @@ fun LoginScreen(onLogin: (String) -> Unit) {
             label = { Text("User ID") }
         )
         Spacer(modifier = Modifier.height(8.dp))
-        Button(onClick = { if(userId.isNotEmpty()) onLogin(userId) }) {
+        Button(onClick = { if(userId.isNotEmpty()) onLogin(UUID.fromString(userId)) }) {
             Text("Login")
+        }
+    }
+}
+
+@Composable
+fun DashboardScreen(account: Account, onBack: () -> Unit) {
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(16.dp)
+            .statusBarsPadding()
+    ) {
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Column {
+                Text(text = "Hallo, ${account.name}!", style = MaterialTheme.typography.headlineMedium)
+                Text(text = "WG: ${account.wgName}", style = MaterialTheme.typography.bodyLarge, color = Color.Gray)
+            }
+            Button(onClick = onBack) {
+                Text("Wechseln")
+            }
+        }
+
+        Spacer(modifier = Modifier.height(32.dp))
+
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(MaterialTheme.colorScheme.surfaceVariant, shape = MaterialTheme.shapes.medium),
+            contentAlignment = Alignment.Center
+        ) {
+            Text("Hier kommen bald deine WG-Kosten hin 🚀")
         }
     }
 }
