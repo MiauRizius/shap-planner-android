@@ -40,6 +40,8 @@ android {
 }
 
 dependencies {
+
+    //Android Studio Auto-Gen
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.androidx.activity.compose)
@@ -55,4 +57,7 @@ dependencies {
     androidTestImplementation(libs.androidx.compose.ui.test.junit4)
     debugImplementation(libs.androidx.compose.ui.tooling)
     debugImplementation(libs.androidx.compose.ui.test.manifest)
+
+    //Manually added
+    implementation("androidx.datastore:datastore-preferences:1.2.0")
 }
