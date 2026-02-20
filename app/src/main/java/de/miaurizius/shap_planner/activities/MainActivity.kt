@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
@@ -65,11 +66,7 @@ class MainActivity : ComponentActivity() {
 
                 when {
                     !isLoggedIn || accountList.isEmpty() -> {
-                        LoginScreen { userId ->
-                            val acc = Account(userId, "MiauRizius", "Pfadi-WG") //TODO: get data from backend
-                            mainViewModel.addAccount(acc)
-                            loginViewModel.login(acc.id.toString())
-                        }
+                        LoginScreen { serverUrl, username, password -> loginViewModel.login(serverUrl, username, password, mainViewModel) }
                     }
 
                     selectedAccount != null -> {
@@ -99,7 +96,11 @@ class MainActivity : ComponentActivity() {
 @Composable
 fun AccountSelectionScreen(accounts: List<Account>, onAccountClick: (Account) -> Unit, onAddAccountClick: () -> Unit) {
     LazyColumn(
-        modifier = Modifier.fillMaxSize().padding(16.dp).statusBarsPadding(),
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(16.dp)
+            .statusBarsPadding()
+            .navigationBarsPadding(),
         verticalArrangement = Arrangement.spacedBy(12.dp)
     ) {
         item {
@@ -131,19 +132,44 @@ fun AccountSelectionScreen(accounts: List<Account>, onAccountClick: (Account) ->
 }
 
 @Composable
-fun LoginScreen(onLogin: (UUID) -> Unit) {
-    var userId by remember { mutableStateOf("") }
+fun LoginScreen(onLogin: (String, String, String) -> Unit) {
+    var serverUrl by remember { mutableStateOf("") }
+    var username by remember { mutableStateOf("") }
+    var password by remember { mutableStateOf("") }
 
-    Column(modifier = Modifier.padding(16.dp).statusBarsPadding()) {
+    Column(modifier = Modifier.padding(16.dp).statusBarsPadding().navigationBarsPadding()) {
         Text("Bitte anmelden")
         Spacer(modifier = Modifier.height(8.dp))
+
+        //Home-Server
         TextField(
-            value = userId,
-            onValueChange = { userId = it },
-            label = { Text("User ID") }
+            value = serverUrl,
+            onValueChange = { serverUrl = it },
+            label = { Text("Server-URL") }
         )
         Spacer(modifier = Modifier.height(8.dp))
-        Button(onClick = { if(userId.isNotEmpty()) onLogin(UUID.fromString(userId)) }) {
+
+        //Username
+        TextField(
+            value = username,
+            onValueChange = { username = it },
+            label = { Text("Nutzername") }
+        )
+        Spacer(modifier = Modifier.height(8.dp))
+
+        //Password
+        TextField(
+            value = password,
+            onValueChange = { password = it },
+            label = { Text("Passwort") }
+        )
+        Spacer(modifier = Modifier.height(8.dp))
+
+        Button(onClick = { if(serverUrl.isNotEmpty() && username.isNotEmpty() && password.isNotEmpty()) onLogin(
+            serverUrl,
+            username,
+            password
+        ) }) {
             Text("Login")
         }
     }
@@ -156,6 +182,7 @@ fun DashboardScreen(account: Account, onBack: () -> Unit) {
             .fillMaxSize()
             .padding(16.dp)
             .statusBarsPadding()
+            .navigationBarsPadding()
     ) {
         Row(
             modifier = Modifier.fillMaxWidth(),

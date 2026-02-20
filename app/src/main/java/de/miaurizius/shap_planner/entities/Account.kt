@@ -15,7 +15,8 @@ data class Account (
     @PrimaryKey val id: UUID,
     val name: String,
     val wgName: String,
-    val avatarUrl: String? = null
+    val avatarUrl: String? = null,
+    val serverUrl: String,
 )
 
 @Dao
