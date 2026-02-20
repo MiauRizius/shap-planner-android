@@ -1,4 +1,4 @@
-package de.miaurizius.shap_planner
+package de.miaurizius.shap_planner.activities
 
 import android.os.Bundle
 import androidx.activity.ComponentActivity
