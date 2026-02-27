@@ -40,6 +40,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import de.miaurizius.shap_planner.TokenStorage
 import de.miaurizius.shap_planner.UserPreferences
 import de.miaurizius.shap_planner.entities.Account
 import de.miaurizius.shap_planner.room.AppDatabase
@@ -58,7 +59,10 @@ class MainActivity : ComponentActivity() {
 
         val database = AppDatabase.getDatabase(applicationContext)
         val dao = database.accountDao()
-        val mainViewModel = MainViewModel(dao)
+
+        val tokenStorage = TokenStorage(applicationContext)
+
+        val mainViewModel = MainViewModel(dao, tokenStorage)
 
         setContent {
             ShapPlannerTheme {
