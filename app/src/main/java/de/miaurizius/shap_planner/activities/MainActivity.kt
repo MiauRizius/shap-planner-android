@@ -2,6 +2,7 @@ package de.miaurizius.shap_planner.activities
 
 import android.os.Bundle
 import androidx.activity.ComponentActivity
+import androidx.activity.compose.BackHandler
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -64,10 +65,28 @@ class MainActivity : ComponentActivity() {
                 val isLoggedIn by loginViewModel.isLoggedIn.collectAsState()
                 val accountList by mainViewModel.accounts.collectAsState()
                 val selectedAccount = mainViewModel.selectedAccount
+                var showLoginForNewAccount by remember { mutableStateOf(false) }
 
                 when {
-                    !isLoggedIn || accountList.isEmpty() -> {
-                        LoginScreen { serverUrl, username, password -> loginViewModel.login(serverUrl, username, password, mainViewModel) }
+
+                    showLoginForNewAccount -> {
+                        LoginScreen(
+                            onLogin = { serverUrl, username, password ->
+                                loginViewModel.login(serverUrl, username, password, mainViewModel)
+                                showLoginForNewAccount = false
+                            },
+                            onBack = {
+                                showLoginForNewAccount = false
+                            }
+                        )
+                    }
+
+                    accountList.isEmpty() -> {
+                        LoginScreen(
+                            onLogin = { serverUrl, username, password ->
+                                loginViewModel.login(serverUrl, username, password, mainViewModel)
+                            }
+                        )
                     }
 
                     selectedAccount != null -> {
@@ -84,7 +103,7 @@ class MainActivity : ComponentActivity() {
                                 mainViewModel.selectAccount(account)
                             },
                             onAddAccountClick = {
-                                loginViewModel.logout()
+                                showLoginForNewAccount = true
                             }
                         )
                     }
@@ -133,7 +152,14 @@ fun AccountSelectionScreen(accounts: List<Account>, onAccountClick: (Account) ->
 }
 
 @Composable
-fun LoginScreen(onLogin: (String, String, String) -> Unit) {
+fun LoginScreen(onLogin: (String, String, String) -> Unit, onBack: (() -> Unit)? = null) {
+
+    if (onBack != null) {
+        BackHandler {
+            onBack()
+        }
+    }
+
     var serverUrl by remember { mutableStateOf("") }
     var username by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
@@ -178,6 +204,11 @@ fun LoginScreen(onLogin: (String, String, String) -> Unit) {
 
 @Composable
 fun DashboardScreen(account: Account, onBack: () -> Unit) {
+
+    BackHandler {
+        onBack()
+    }
+
     Column(
         modifier = Modifier
             .fillMaxSize()
