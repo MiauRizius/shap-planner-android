@@ -17,6 +17,7 @@ data class Account (
     val wgName: String,
     val avatarUrl: String? = null,
     val serverUrl: String,
+    val role: String,
 )
 
 @Dao

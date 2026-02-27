@@ -65,4 +65,12 @@ dependencies {
     val room_version = "2.8.4"
     implementation("androidx.room:room-runtime:$room_version")
     ksp("androidx.room:room-compiler:$room_version")
+
+    // Retrofit + Gson
+    implementation("com.squareup.retrofit2:retrofit:2.9.0")
+    implementation("com.squareup.retrofit2:converter-gson:2.9.0")
+    // OkHttp logging (debug)
+    implementation("com.squareup.okhttp3:logging-interceptor:4.9.3")
+    // AndroidX Security (EncryptedSharedPreferences)
+    implementation("androidx.security:security-crypto:1.1.0-alpha03")
 }

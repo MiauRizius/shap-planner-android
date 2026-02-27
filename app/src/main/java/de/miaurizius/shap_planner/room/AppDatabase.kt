@@ -7,7 +7,7 @@ import androidx.room.RoomDatabase
 import de.miaurizius.shap_planner.entities.Account
 import de.miaurizius.shap_planner.entities.AccountDao
 
-@Database(entities = [Account::class], version = 1)
+@Database(entities = [Account::class], version = 2)
 abstract class AppDatabase : RoomDatabase() {
     abstract fun accountDao(): AccountDao
     companion object {
@@ -20,7 +20,7 @@ abstract class AppDatabase : RoomDatabase() {
                     context.applicationContext,
                     AppDatabase::class.java,
                     "shap_planner_database"
-                ).build()
+                ).fallbackToDestructiveMigration(true).build()
                 INSTANCE = instance
                 instance
             }

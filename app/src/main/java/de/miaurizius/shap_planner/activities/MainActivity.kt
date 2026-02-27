@@ -53,7 +53,7 @@ class MainActivity : ComponentActivity() {
 //        enableEdgeToEdge()
 
         val prefs = UserPreferences(this)
-        val loginViewModel = LoginViewModel(prefs)
+        val loginViewModel = LoginViewModel(prefs, applicationContext)
 
         val database = AppDatabase.getDatabase(applicationContext)
         val dao = database.accountDao()
