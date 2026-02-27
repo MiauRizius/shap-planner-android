@@ -30,7 +30,7 @@ class LoginViewModel(private val prefs: UserPreferences, private val appContext:
 
             try {
                 val response = withContext(Dispatchers.IO) {
-                    api.login(LoginRequest(username.lowercase(getDefault()), password))
+                    api.login(LoginRequest(username.lowercase(getDefault()).trim(), password))
                 }
 
                 if(response.isSuccessful) {
@@ -45,7 +45,7 @@ class LoginViewModel(private val prefs: UserPreferences, private val appContext:
 
                     val account = Account(
                         id = UUID.fromString(body.user.id),
-                        name = username,
+                        name = username.trim(),
                         wgName = body.wgName,
                         avatarUrl = null,
                         serverUrl = serverUrl,
