@@ -11,7 +11,7 @@ data class LoginUser(val id: String, val username: String, val role: String, val
 data class LoginResponse(val access_token: String, val refresh_token: String, val user: LoginUser, val wgName: String)
 
 data class RefreshRequest(val refresh_token: String)
-data class RefreshResponse(val accessToken: String, val refreshToken: String)
+data class RefreshResponse(val access_token: String, val refresh_token: String)
 
 interface APIService {
     @POST("api/login")

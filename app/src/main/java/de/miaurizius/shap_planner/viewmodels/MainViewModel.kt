@@ -38,7 +38,6 @@ class MainViewModel(private val accountDao: AccountDao, private val tokenStorage
                 return@launch
             }
 
-            println("Testing with AT $accessToken")
             val pingResponse = api.ping("Bearer $accessToken")
 
             if(pingResponse.isSuccessful) {
@@ -47,7 +46,6 @@ class MainViewModel(private val accountDao: AccountDao, private val tokenStorage
             }
 
             if(pingResponse.code() == 401) {
-                println("Testing with RT $refreshToken")
                 val refreshResponse = api.refresh(RefreshRequest(refreshToken))
 
                 if(refreshResponse.isSuccessful) {
@@ -55,8 +53,8 @@ class MainViewModel(private val accountDao: AccountDao, private val tokenStorage
 
                     tokenStorage.saveTokens(
                         account.id.toString(),
-                        newTokens.accessToken,
-                        newTokens.accessToken
+                        newTokens.access_token,
+                        newTokens.access_token
                     )
 
                     sessionState = SessionState.Valid
