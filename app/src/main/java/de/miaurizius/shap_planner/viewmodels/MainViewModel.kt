@@ -24,6 +24,13 @@ class MainViewModel(private val accountDao: AccountDao) : ViewModel() {
         }
     }
 
+    fun deleteAccount(account: Account) {
+        viewModelScope.launch {
+            accountDao.deleteAccount(account)
+            selectedAccount = null
+        }
+    }
+
     var selectedAccount by mutableStateOf<Account?>(null)
         private set
 

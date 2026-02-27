@@ -13,6 +13,8 @@ import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import java.util.Locale
+import java.util.Locale.getDefault
 import java.util.UUID
 
 class LoginViewModel(private val prefs: UserPreferences, private val appContext: Context) : ViewModel() {
@@ -28,7 +30,7 @@ class LoginViewModel(private val prefs: UserPreferences, private val appContext:
 
             try {
                 val response = withContext(Dispatchers.IO) {
-                    api.login(LoginRequest(username, password))
+                    api.login(LoginRequest(username.lowercase(getDefault()), password))
                 }
 
                 if(response.isSuccessful) {

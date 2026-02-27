@@ -92,7 +92,8 @@ class MainActivity : ComponentActivity() {
                     selectedAccount != null -> {
                         DashboardScreen(
                             account = selectedAccount,
-                            onBack = { mainViewModel.logoutFromAccount() }
+                            onBack = { mainViewModel.logoutFromAccount() },
+                            onDelete = { mainViewModel.deleteAccount(selectedAccount) }
                         )
                     }
 
@@ -203,7 +204,7 @@ fun LoginScreen(onLogin: (String, String, String) -> Unit, onBack: (() -> Unit)?
 }
 
 @Composable
-fun DashboardScreen(account: Account, onBack: () -> Unit) {
+fun DashboardScreen(account: Account, onBack: () -> Unit, onDelete: () -> Unit) {
 
     BackHandler {
         onBack()
@@ -230,7 +231,13 @@ fun DashboardScreen(account: Account, onBack: () -> Unit) {
             }
         }
 
-        Spacer(modifier = Modifier.height(32.dp))
+        Spacer(modifier = Modifier.height(5.dp))
+
+        Button(onClick = onDelete) {
+            Text("Löschen")
+        }
+
+        Spacer(modifier = Modifier.height(10.dp))
 
         Box(
             modifier = Modifier
