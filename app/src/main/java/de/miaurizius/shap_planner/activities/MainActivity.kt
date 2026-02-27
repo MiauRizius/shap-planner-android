@@ -46,6 +46,7 @@ import de.miaurizius.shap_planner.UserPreferences
 import de.miaurizius.shap_planner.entities.Account
 import de.miaurizius.shap_planner.network.SessionState
 import de.miaurizius.shap_planner.room.AppDatabase
+import de.miaurizius.shap_planner.ui.AppContent
 import de.miaurizius.shap_planner.ui.theme.ShapPlannerTheme
 import de.miaurizius.shap_planner.viewmodels.LoginViewModel
 import de.miaurizius.shap_planner.viewmodels.MainViewModel
@@ -54,16 +55,12 @@ import java.util.UUID
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-//        enableEdgeToEdge()
 
         val prefs = UserPreferences(this)
         val loginViewModel = LoginViewModel(prefs, applicationContext)
-
         val database = AppDatabase.getDatabase(applicationContext)
         val dao = database.accountDao()
-
         val tokenStorage = TokenStorage(applicationContext)
-
         val mainViewModel = MainViewModel(dao, tokenStorage)
 
         setContent {
@@ -71,215 +68,30 @@ class MainActivity : ComponentActivity() {
                 val isLoggedIn by loginViewModel.isLoggedIn.collectAsState()
                 val accountList by mainViewModel.accounts.collectAsState()
                 val selectedAccount = mainViewModel.selectedAccount
-                var showLoginForNewAccount by remember { mutableStateOf(false) }
+                val showLoginForNewAccount = remember { mutableStateOf(false) }
 
-                when {
-
-                    showLoginForNewAccount -> {
-                        LoginScreen(
-                            onLogin = { serverUrl, username, password ->
-                                loginViewModel.login(serverUrl, username, password, mainViewModel)
-                                showLoginForNewAccount = false
-                            },
-                            onBack = {
-                                showLoginForNewAccount = false
-                            }
-                        )
-                    }
-
-                    accountList.isEmpty() -> {
-                        LoginScreen(
-                            onLogin = { serverUrl, username, password ->
-                                loginViewModel.login(serverUrl, username, password, mainViewModel)
-                            }
-                        )
-                    }
-
-                    selectedAccount != null -> {
-                        DashboardScreen(
-                            account = selectedAccount,
-                            onBack = { mainViewModel.logoutFromAccount() },
-                            onDelete = { mainViewModel.deleteAccount(selectedAccount) },
-                            sessionState = mainViewModel.sessionState,
-                            onValidate = { mainViewModel.validateSession(selectedAccount) },
-                            onSessionInvalid = { mainViewModel.logoutFromAccount() }
-                        )
-                    }
-
-                    else -> {
-                        AccountSelectionScreen(
-                            accounts = accountList,
-                            onAccountClick = { account ->
-                                mainViewModel.selectAccount(account)
-                            },
-                            onAddAccountClick = {
-                                showLoginForNewAccount = true
-                            }
-                        )
-                    }
+                BackHandler(enabled = showLoginForNewAccount.value && accountList.isNotEmpty()) {
+                    showLoginForNewAccount.value = false
                 }
+
+                AppContent(
+                    isLoggedIn = isLoggedIn,
+                    accountList = accountList,
+                    selectedAccount = selectedAccount,
+                    showLoginForNewAccount = showLoginForNewAccount.value,
+                    onLogin = { server, user, pass ->
+                        loginViewModel.login(server, user, pass, mainViewModel)
+                        showLoginForNewAccount.value = false
+                    },
+                    onSelectAccount = { mainViewModel.selectAccount(it) },
+                    onLogoutAccount = { mainViewModel.logoutFromAccount() },
+                    onAddAccountClick = { showLoginForNewAccount.value = true },
+                    onDeleteAccount = { mainViewModel.deleteAccount(selectedAccount!!) },
+                    sessionState = mainViewModel.sessionState,
+                    onValidateSession = { mainViewModel.validateSession(selectedAccount!!) },
+                    onSessionInvalid = { mainViewModel.logoutFromAccount() }
+                )
             }
         }
     }
-}
-
-@Composable
-fun AccountSelectionScreen(accounts: List<Account>, onAccountClick: (Account) -> Unit, onAddAccountClick: () -> Unit) {
-    LazyColumn(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(16.dp)
-            .statusBarsPadding()
-            .navigationBarsPadding(),
-        verticalArrangement = Arrangement.spacedBy(12.dp)
-    ) {
-        item {
-            Text("Wähle einen Account", style = MaterialTheme.typography.headlineSmall)
-        }
-
-        items(accounts) { account ->
-            Card(modifier = Modifier.fillMaxWidth().clickable{ onAccountClick(account) }) {
-                Row(modifier = Modifier.padding(16.dp), verticalAlignment = Alignment.CenterVertically) {
-                    Box(modifier = Modifier.size(40.dp).background(Color.Gray, shape = CircleShape))
-                    Spacer(modifier = Modifier.width(16.dp))
-                    Column {
-                        Text(text = account.name, fontWeight = FontWeight.Bold)
-                        Text(text = account.wgName, style = MaterialTheme.typography.bodyMedium)
-                    }
-                }
-            }
-        }
-        item {
-            Spacer(modifier = Modifier.height(8.dp))
-            Button(
-                onClick = onAddAccountClick,
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                Text("Anderen Account hinzufügen")
-            }
-        }
-    }
-}
-
-@Composable
-fun LoginScreen(onLogin: (String, String, String) -> Unit, onBack: (() -> Unit)? = null) {
-
-    if (onBack != null) {
-        BackHandler {
-            onBack()
-        }
-    }
-
-    var serverUrl by remember { mutableStateOf("") }
-    var username by remember { mutableStateOf("") }
-    var password by remember { mutableStateOf("") }
-
-    Column(modifier = Modifier.padding(16.dp).statusBarsPadding().navigationBarsPadding()) {
-        Text("Bitte anmelden")
-        Spacer(modifier = Modifier.height(8.dp))
-
-        //Home-Server
-        TextField(
-            value = serverUrl,
-            onValueChange = { serverUrl = it },
-            label = { Text("Server-URL") }
-        )
-        Spacer(modifier = Modifier.height(8.dp))
-
-        //Username
-        TextField(
-            value = username,
-            onValueChange = { username = it },
-            label = { Text("Nutzername") }
-        )
-        Spacer(modifier = Modifier.height(8.dp))
-
-        //Password
-        TextField(
-            value = password,
-            onValueChange = { password = it },
-            label = { Text("Passwort") }
-        )
-        Spacer(modifier = Modifier.height(8.dp))
-
-        Button(onClick = { if(serverUrl.isNotEmpty() && username.isNotEmpty() && password.isNotEmpty()) onLogin(
-            serverUrl,
-            username,
-            password
-        ) }) {
-            Text("Login")
-        }
-    }
-}
-
-@Composable
-fun DashboardScreen(
-    account: Account,
-    onBack: () -> Unit,
-    onDelete: () -> Unit,
-    sessionState: SessionState,
-    onValidate: () -> Unit,
-    onSessionInvalid: () -> Unit) {
-
-    LaunchedEffect(Unit) { onValidate() }
-
-    when (sessionState) {
-        SessionState.Loading -> {
-            Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                CircularProgressIndicator()
-            }
-        }
-        SessionState.Valid -> {
-            BackHandler {
-                onBack()
-            }
-            Column(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(16.dp)
-                    .statusBarsPadding()
-                    .navigationBarsPadding()
-            ) {
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Column {
-                        Text(text = "Hallo, ${account.name}!", style = MaterialTheme.typography.headlineMedium)
-                        Text(text = "WG: ${account.wgName}", style = MaterialTheme.typography.bodyLarge, color = Color.Gray)
-                    }
-                    Button(onClick = onBack) {
-                        Text("Wechseln")
-                    }
-                }
-
-                Spacer(modifier = Modifier.height(5.dp))
-
-                Button(onClick = onDelete) {
-                    Text("Löschen")
-                }
-
-                Spacer(modifier = Modifier.height(10.dp))
-
-                Box(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .background(MaterialTheme.colorScheme.surfaceVariant, shape = MaterialTheme.shapes.medium),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Text("Hier kommen bald deine WG-Kosten hin 🚀")
-                }
-            }
-        }
-        SessionState.Invalid -> {
-            LaunchedEffect(Unit) {
-                onSessionInvalid()
-            }
-        }
-        is SessionState.Error -> {
-            Text("Server error")
-        }
-    }
-
 }
