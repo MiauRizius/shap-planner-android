@@ -7,7 +7,7 @@ import androidx.room.RoomDatabase
 import de.miaurizius.shap_planner.entities.Account
 import de.miaurizius.shap_planner.entities.AccountDao
 
-@Database(entities = [Account::class], version = 2)
+@Database(entities = [Account::class], version = 3)
 abstract class AppDatabase : RoomDatabase() {
     abstract fun accountDao(): AccountDao
     companion object {

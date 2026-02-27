@@ -24,6 +24,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
@@ -43,6 +44,7 @@ import androidx.compose.ui.unit.dp
 import de.miaurizius.shap_planner.TokenStorage
 import de.miaurizius.shap_planner.UserPreferences
 import de.miaurizius.shap_planner.entities.Account
+import de.miaurizius.shap_planner.network.SessionState
 import de.miaurizius.shap_planner.room.AppDatabase
 import de.miaurizius.shap_planner.ui.theme.ShapPlannerTheme
 import de.miaurizius.shap_planner.viewmodels.LoginViewModel
@@ -97,7 +99,10 @@ class MainActivity : ComponentActivity() {
                         DashboardScreen(
                             account = selectedAccount,
                             onBack = { mainViewModel.logoutFromAccount() },
-                            onDelete = { mainViewModel.deleteAccount(selectedAccount) }
+                            onDelete = { mainViewModel.deleteAccount(selectedAccount) },
+                            sessionState = mainViewModel.sessionState,
+                            onValidate = { mainViewModel.validateSession(selectedAccount) },
+                            onSessionInvalid = { mainViewModel.logoutFromAccount() }
                         )
                     }
 
@@ -208,48 +213,73 @@ fun LoginScreen(onLogin: (String, String, String) -> Unit, onBack: (() -> Unit)?
 }
 
 @Composable
-fun DashboardScreen(account: Account, onBack: () -> Unit, onDelete: () -> Unit) {
+fun DashboardScreen(
+    account: Account,
+    onBack: () -> Unit,
+    onDelete: () -> Unit,
+    sessionState: SessionState,
+    onValidate: () -> Unit,
+    onSessionInvalid: () -> Unit) {
 
-    BackHandler {
-        onBack()
-    }
+    LaunchedEffect(Unit) { onValidate() }
 
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(16.dp)
-            .statusBarsPadding()
-            .navigationBarsPadding()
-    ) {
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Column {
-                Text(text = "Hallo, ${account.name}!", style = MaterialTheme.typography.headlineMedium)
-                Text(text = "WG: ${account.wgName}", style = MaterialTheme.typography.bodyLarge, color = Color.Gray)
-            }
-            Button(onClick = onBack) {
-                Text("Wechseln")
+    when (sessionState) {
+        SessionState.Loading -> {
+            Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                CircularProgressIndicator()
             }
         }
+        SessionState.Valid -> {
+            BackHandler {
+                onBack()
+            }
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(16.dp)
+                    .statusBarsPadding()
+                    .navigationBarsPadding()
+            ) {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Column {
+                        Text(text = "Hallo, ${account.name}!", style = MaterialTheme.typography.headlineMedium)
+                        Text(text = "WG: ${account.wgName}", style = MaterialTheme.typography.bodyLarge, color = Color.Gray)
+                    }
+                    Button(onClick = onBack) {
+                        Text("Wechseln")
+                    }
+                }
 
-        Spacer(modifier = Modifier.height(5.dp))
+                Spacer(modifier = Modifier.height(5.dp))
 
-        Button(onClick = onDelete) {
-            Text("Löschen")
+                Button(onClick = onDelete) {
+                    Text("Löschen")
+                }
+
+                Spacer(modifier = Modifier.height(10.dp))
+
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .background(MaterialTheme.colorScheme.surfaceVariant, shape = MaterialTheme.shapes.medium),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text("Hier kommen bald deine WG-Kosten hin 🚀")
+                }
+            }
         }
-
-        Spacer(modifier = Modifier.height(10.dp))
-
-        Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .background(MaterialTheme.colorScheme.surfaceVariant, shape = MaterialTheme.shapes.medium),
-            contentAlignment = Alignment.Center
-        ) {
-            Text("Hier kommen bald deine WG-Kosten hin 🚀")
+        SessionState.Invalid -> {
+            LaunchedEffect(Unit) {
+                onSessionInvalid()
+            }
+        }
+        is SessionState.Error -> {
+            Text("Server error")
         }
     }
+
 }
