@@ -19,6 +19,7 @@ class TokenStorage(context: Context) {
     )
 
     fun saveTokens(accountId: String, accessToken: String, refreshToken: String) {
+//        println("Account ID: ${accountId}\nAToken: ${accessToken}\nRToken: ${refreshToken}")
         prefs.edit()
             .putString("access_$accountId", accessToken)
             .putString("refresh_$accountId", refreshToken)

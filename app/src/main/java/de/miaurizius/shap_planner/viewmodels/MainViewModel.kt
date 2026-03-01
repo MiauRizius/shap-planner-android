@@ -8,9 +8,11 @@ import androidx.lifecycle.viewModelScope
 import de.miaurizius.shap_planner.TokenStorage
 import de.miaurizius.shap_planner.entities.Account
 import de.miaurizius.shap_planner.entities.AccountDao
+import de.miaurizius.shap_planner.entities.Expense
 import de.miaurizius.shap_planner.network.RefreshRequest
 import de.miaurizius.shap_planner.network.RetrofitProvider
 import de.miaurizius.shap_planner.network.SessionState
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.stateIn
@@ -19,11 +21,31 @@ import kotlin.collections.emptyList
 
 class MainViewModel(private val accountDao: AccountDao, private val tokenStorage: TokenStorage) : ViewModel() {
 
+    var selectedAccount by mutableStateOf<Account?>(null)
+        private set
     val accounts: StateFlow<List<Account>> = accountDao.getAllAccounts()
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
-
     var sessionState by mutableStateOf<SessionState>(SessionState.Loading)
         private set
+
+    private val _expenses = MutableStateFlow<List<Expense>>(emptyList())
+    val expenses: StateFlow<List<Expense>> = _expenses
+
+    fun loadExpenses(account: Account) {
+        viewModelScope.launch {
+            try {
+                val api = RetrofitProvider.create(account.serverUrl)
+                val accessToken = tokenStorage.getAccess(account.id.toString())
+
+                val response = api.expenseGet("Bearer $accessToken")
+                if (response.isSuccessful) {
+                    _expenses.value = response.body()?.expenses ?: emptyList()
+                }
+            } catch (e: Exception) {
+                _expenses.value = emptyList()
+            }
+        }
+    }
 
     fun validateSession(account: Account) {
         viewModelScope.launch {
@@ -54,10 +76,15 @@ class MainViewModel(private val accountDao: AccountDao, private val tokenStorage
                     tokenStorage.saveTokens(
                         account.id.toString(),
                         newTokens.access_token,
-                        newTokens.access_token
+                        newTokens.refresh_token
                     )
 
                     sessionState = SessionState.Valid
+
+                    // Fetch data
+                    loadExpenses(account)
+                    println("All data fetched")
+
                     return@launch
                 } else {
                     sessionState = SessionState.Invalid
@@ -73,7 +100,6 @@ class MainViewModel(private val accountDao: AccountDao, private val tokenStorage
             accountDao.insertAccount(account)
         }
     }
-
     fun deleteAccount(account: Account) {
         viewModelScope.launch {
             accountDao.deleteAccount(account)
@@ -81,14 +107,9 @@ class MainViewModel(private val accountDao: AccountDao, private val tokenStorage
             selectedAccount = null
         }
     }
-
-    var selectedAccount by mutableStateOf<Account?>(null)
-        private set
-
     fun selectAccount(account: Account) {
         selectedAccount = account
     }
-
     fun logoutFromAccount() {
         selectedAccount = null
     }

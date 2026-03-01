@@ -27,19 +27,19 @@ class MainActivity : ComponentActivity() {
         val tokenStorage = TokenStorage(applicationContext)
         val mainViewModel = MainViewModel(dao, tokenStorage)
 
+
         setContent {
             ShapPlannerTheme {
-                val isLoggedIn by loginViewModel.isLoggedIn.collectAsState()
                 val accountList by mainViewModel.accounts.collectAsState()
                 val selectedAccount = mainViewModel.selectedAccount
                 val showLoginForNewAccount = remember { mutableStateOf(false) }
+                val expenses by mainViewModel.expenses.collectAsState()
 
                 BackHandler(enabled = showLoginForNewAccount.value && accountList.isNotEmpty()) {
                     showLoginForNewAccount.value = false
                 }
 
                 AppContent(
-                    isLoggedIn = isLoggedIn,
                     accountList = accountList,
                     selectedAccount = selectedAccount,
                     showLoginForNewAccount = showLoginForNewAccount.value,
@@ -53,7 +53,10 @@ class MainActivity : ComponentActivity() {
                     onDeleteAccount = { mainViewModel.deleteAccount(selectedAccount!!) },
                     sessionState = mainViewModel.sessionState,
                     onValidateSession = { mainViewModel.validateSession(selectedAccount!!) },
-                    onSessionInvalid = { mainViewModel.logoutFromAccount() }
+                    onSessionInvalid = { mainViewModel.logoutFromAccount() },
+                    expenses = expenses,
+                    onExpenseClick = { expense -> println("Clicked: ${expense.title}") },
+                    viewModel = mainViewModel
                 )
             }
         }
