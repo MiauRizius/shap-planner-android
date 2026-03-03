@@ -12,7 +12,7 @@ class TokenStorage(context: Context) {
 
     private val prefs = EncryptedSharedPreferences.create(
         context,
-        "wg_token_prefs",
+        "wg_token_prefs2",
         masterKey,
         EncryptedSharedPreferences.PrefKeyEncryptionScheme.AES256_SIV,
         EncryptedSharedPreferences.PrefValueEncryptionScheme.AES256_GCM

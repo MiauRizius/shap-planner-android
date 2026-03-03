@@ -8,7 +8,7 @@ import retrofit2.converter.gson.GsonConverterFactory
 object RetrofitProvider {
 
     fun create(serverUrl: String): APIService {
-        val base = if (serverUrl.endsWith("/")) serverUrl else "$serverUrl/"
+        val base = if (serverUrl.endsWith("/")) "https://$serverUrl" else "https://$serverUrl/"
 
         val logger = HttpLoggingInterceptor().apply { level = HttpLoggingInterceptor.Level.BASIC }
 

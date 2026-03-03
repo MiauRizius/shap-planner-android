@@ -39,7 +39,7 @@ fun LoginScreen(onLogin: (String, String, String) -> Unit, onBack: (() -> Unit)?
         TextField(
             value = serverUrl,
             onValueChange = { serverUrl = it },
-            label = { Text("Server-URL") }
+            label = { Text("Server-Domain") }
         )
         Spacer(modifier = Modifier.height(8.dp))
 
