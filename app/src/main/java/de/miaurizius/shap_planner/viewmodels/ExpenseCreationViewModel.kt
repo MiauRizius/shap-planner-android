@@ -30,35 +30,37 @@ class ExpenseCreationViewModel(
         }
     }
 
-    fun saveExpense(account: Account, title: String, amountCents: Int, selectedUserIds: List<UUID>) {
-        viewModelScope.launch {
-            val expenseId = UUID.randomUUID() //TODO: Backend  has to generate UUID
-            val newExpense = Expense(
-                id = expenseId,
-                payer_id = account.id,
-                amount = amountCents,
-                title = title,
-                description = "",
-                attachments = null,
-                created_at = (System.currentTimeMillis() / 1000).toInt(),
-                last_updated_at = 0
-            )
-
-            expenseDao.insertExpense(newExpense)
-
-            val shareAmount = amountCents / selectedUserIds.size
-            selectedUserIds.forEach { userId ->
-                shareDao.insertShare(
-                    ExpenseShare(
-                        UUID.randomUUID(), //TODO: Backend has to generate UUID
-                        expenseId,
-                        userId,
-                        shareAmount
-                    )
-                )
-            }
-
-            // API Calls
-        }
+    fun saveExpense(
+        account: Account,
+        title: String,
+        description: String,
+        amountCents: Int,
+        shares: Map<UUID, Int>,
+        attachments: List<String>
+    ) {
+//        viewModelScope.launch {
+//            val expenseId = UUID.randomUUID()
+//            val newExpense = Expense(
+//                id = expenseId,
+//                payer_id = account.id,
+//                amount = amountCents,
+//                title = title,
+//                description = description,
+//                attachments = if (attachments.isEmpty()) null else attachments,
+//                created_at = (System.currentTimeMillis() / 1000).toInt(),
+//                last_updated_at = 0
+//            )
+//
+//            expenseDao.insertExpense(newExpense)
+//
+//            shares.forEach { (userId, shareCents) ->
+//                shareDao.insertShare(
+//                    ExpenseShare(UUID.randomUUID(), expenseId, userId, shareCents)
+//                )
+//            }
+//
+//            // API POST Request
+//
+//        }
     }
 }

@@ -2,24 +2,26 @@ package de.miaurizius.shap_planner.ui.screens
 
 import android.annotation.SuppressLint
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material3.Card
-import androidx.compose.material3.DividerDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
@@ -54,32 +56,81 @@ fun ExpenseDetailScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text(expense.title) },
-                navigationIcon = { IconButton(onClick = onBack) {
-                    Icon(Icons.AutoMirrored.Filled.ArrowBack, "Back")
-                } }
+                title = { Text("Expense Details") },
+                navigationIcon = {
+                    IconButton(onClick = onBack) {
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
+                    }
+                }
             )
         }
     ) { padding ->
-        Column(modifier = Modifier.padding(padding).padding(16.dp)) {
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(padding)
+                .padding(16.dp)
+        ) {
+            // Hero Section: Amount & Title
+            Column(
+                modifier = Modifier.fillMaxWidth().padding(bottom = 24.dp),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                Text(
+                    text = "Total Amount",
+                    style = MaterialTheme.typography.labelLarge,
+                    color = MaterialTheme.colorScheme.secondary
+                )
+                Text(
+                    text = String.format("%.2f €", expense.amount / 100.0),
+                    style = MaterialTheme.typography.displayMedium,
+                    fontWeight = FontWeight.Black,
+                    color = MaterialTheme.colorScheme.primary
+                )
+                Text(
+                    text = expense.title,
+                    style = MaterialTheme.typography.headlineSmall,
+                    fontWeight = FontWeight.Bold,
+                    textAlign = TextAlign.Center
+                )
+            }
+
+            // Description Card (only shown if not empty)
+            if (expense.description.isNotBlank()) {
+                androidx.compose.material3.ElevatedCard(
+                    modifier = Modifier.fillMaxWidth().padding(bottom = 24.dp),
+                    colors = androidx.compose.material3.CardDefaults.elevatedCardColors(
+                        containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)
+                    )
+                ) {
+                    Column(modifier = Modifier.padding(16.dp)) {
+                        Text(
+                            text = "Description",
+                            style = MaterialTheme.typography.labelMedium,
+                            color = MaterialTheme.colorScheme.primary
+                        )
+                        Spacer(modifier = Modifier.height(4.dp))
+                        Text(text = expense.description, style = MaterialTheme.typography.bodyLarge)
+                    }
+                }
+            }
+
             Text(
-                text = String.format("%.2f€", expense.amount / 100.0),
-                style = MaterialTheme.typography.displayMedium,
+                text = "Cost Distribution",
+                style = MaterialTheme.typography.titleMedium,
                 fontWeight = FontWeight.Bold,
-                color = MaterialTheme.colorScheme.primary
+                modifier = Modifier.padding(bottom = 12.dp)
             )
-            Text(expense.description, style = MaterialTheme.typography.bodyLarge)
 
-            Spacer(modifier = Modifier.height(24.dp))
-            HorizontalDivider(Modifier, DividerDefaults.Thickness, DividerDefaults.color)
-            Spacer(modifier = Modifier.height(16.dp))
-
-            Text("Cost Allocation", style = MaterialTheme.typography.titleLarge)
-            Spacer(modifier = Modifier.height(8.dp))
-
-            LazyColumn(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+            LazyColumn(
+                verticalArrangement = Arrangement.spacedBy(12.dp),
+                modifier = Modifier.fillMaxSize()
+            ) {
                 items(shares) { item ->
-                    ShareItem(item.user?.name ?: "Unknown User", item.share.share_cents)
+                    ShareItem(
+                        name = item.user?.name ?: "Unknown User",
+                        amountCents = item.share.share_cents
+                    )
                 }
             }
         }
@@ -89,20 +140,49 @@ fun ExpenseDetailScreen(
 @SuppressLint("DefaultLocale")
 @Composable
 fun ShareItem(name: String, amountCents: Int) {
-    Card(modifier = Modifier
-        .fillMaxWidth()
-        .padding(vertical = 4.dp)
+    androidx.compose.material3.OutlinedCard(
+        modifier = Modifier.fillMaxWidth(),
+        shape = MaterialTheme.shapes.medium,
+        colors = androidx.compose.material3.CardDefaults.outlinedCardColors(
+            containerColor = MaterialTheme.colorScheme.surface
+        )
     ) {
         Row(
-            modifier = Modifier.fillMaxWidth().padding(16.dp),
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(12.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Text(name, fontWeight = FontWeight.Medium, modifier = Modifier.weight(1f))
+            // User Avatar Circle
+            Surface(
+                shape = androidx.compose.foundation.shape.CircleShape,
+                color = MaterialTheme.colorScheme.secondaryContainer,
+                modifier = Modifier.size(36.dp)
+            ) {
+                Box(contentAlignment = Alignment.Center) {
+                    Text(
+                        text = name.take(1).uppercase(),
+                        style = MaterialTheme.typography.bodyMedium,
+                        fontWeight = FontWeight.Bold,
+                        color = MaterialTheme.colorScheme.onSecondaryContainer
+                    )
+                }
+            }
+
+            Spacer(modifier = Modifier.width(12.dp))
+
             Text(
-                text = String.format("%.2f€", amountCents / 100.0),
-                color = if (amountCents > 0) Color(0xFF4CAF50) else Color.Gray,
+                text = name,
+                style = MaterialTheme.typography.bodyLarge,
+                fontWeight = FontWeight.Medium,
+                modifier = Modifier.weight(1f)
+            )
+
+            Text(
+                text = String.format("%.2f €", amountCents / 100.0),
+                style = MaterialTheme.typography.bodyLarge,
                 fontWeight = FontWeight.Bold,
-                style = MaterialTheme.typography.bodyLarge
+                color = if (amountCents > 0) Color(0xFF2E7D32) else Color.Gray
             )
         }
     }

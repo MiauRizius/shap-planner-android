@@ -1,6 +1,5 @@
 package de.miaurizius.shap_planner.repository
 
-import de.miaurizius.shap_planner.entities.Expense
 import de.miaurizius.shap_planner.entities.ExpenseShare
 import de.miaurizius.shap_planner.entities.ExpenseShareDao
 import de.miaurizius.shap_planner.network.APIService

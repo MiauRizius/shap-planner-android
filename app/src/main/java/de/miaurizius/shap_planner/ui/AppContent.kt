@@ -1,7 +1,5 @@
 package de.miaurizius.shap_planner.ui
 
-import androidx.activity.compose.BackHandler
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -55,7 +53,7 @@ fun AppContent(
                 account = selectedAccount!!,
                 viewModel = creationViewModel,
                 onBack = { showAddExpenseScreen = false },
-                onSaved = { showAddExpenseScreen = false }
+                onSaved = { showAddExpenseScreen = false },
             )
         }
         selectedExpense != null -> {

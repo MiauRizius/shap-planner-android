@@ -61,6 +61,7 @@ dependencies {
 
     //Manually added
     implementation("androidx.datastore:datastore-preferences:1.2.0")
+    implementation("androidx.compose.material:material-icons-extended:1.6.0")
 
     val room_version = "2.8.4"
     implementation("androidx.room:room-runtime:$room_version")

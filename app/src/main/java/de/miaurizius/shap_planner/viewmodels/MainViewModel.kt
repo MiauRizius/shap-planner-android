@@ -82,10 +82,6 @@ class MainViewModel(
 
                     sessionState = SessionState.Valid
 
-                    // Fetch data
-//                    loadExpenses(account)
-                    println("All data fetched")
-
                     return@launch
                 } else {
                     sessionState = SessionState.Invalid
