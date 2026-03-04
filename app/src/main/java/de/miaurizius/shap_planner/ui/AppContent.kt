@@ -1,5 +1,7 @@
 package de.miaurizius.shap_planner.ui
 
+import androidx.activity.compose.BackHandler
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -10,8 +12,10 @@ import de.miaurizius.shap_planner.entities.Expense
 import de.miaurizius.shap_planner.network.SessionState
 import de.miaurizius.shap_planner.ui.screens.AccountSelectionScreen
 import de.miaurizius.shap_planner.ui.screens.DashboardScreen
+import de.miaurizius.shap_planner.ui.screens.ExpenseCreationScreen
 import de.miaurizius.shap_planner.ui.screens.ExpenseDetailScreen
 import de.miaurizius.shap_planner.ui.screens.LoginScreen
+import de.miaurizius.shap_planner.viewmodels.ExpenseCreationViewModel
 import de.miaurizius.shap_planner.viewmodels.ExpenseDetailViewModel
 import de.miaurizius.shap_planner.viewmodels.MainViewModel
 
@@ -39,11 +43,21 @@ fun AppContent(
 
     //Important
     viewModel: MainViewModel,
-    detailViewModel: ExpenseDetailViewModel
+    detailViewModel: ExpenseDetailViewModel,
+    creationViewModel: ExpenseCreationViewModel
 ) {
     var selectedExpense by remember { mutableStateOf<Expense?>(null) }
+    var showAddExpenseScreen by remember { mutableStateOf(false) }
 
     when {
+        showAddExpenseScreen -> {
+            ExpenseCreationScreen(
+                account = selectedAccount!!,
+                viewModel = creationViewModel,
+                onBack = { showAddExpenseScreen = false },
+                onSaved = { showAddExpenseScreen = false }
+            )
+        }
         selectedExpense != null -> {
             ExpenseDetailScreen(
                 expense = selectedExpense!!,
@@ -65,7 +79,8 @@ fun AppContent(
             onDelete = onDeleteAccount,
             sessionState = sessionState,
             onValidate = onValidateSession,
-            onSessionInvalid = onSessionInvalid
+            onSessionInvalid = onSessionInvalid,
+            onAddExpenseClick = { showAddExpenseScreen = true },
         )
         else -> AccountSelectionScreen(
             accounts = accountList,

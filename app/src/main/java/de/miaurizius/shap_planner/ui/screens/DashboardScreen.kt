@@ -22,6 +22,7 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -45,6 +46,7 @@ fun DashboardScreen(
     // Data and regarding Methods
     account: Account,
     onExpenseClick: (Expense) -> Unit,
+    onAddExpenseClick: () -> Unit,
 
     // Default Methods
     mainViewModel: MainViewModel,
@@ -69,63 +71,74 @@ fun DashboardScreen(
             BackHandler {
                 onBack()
             }
-            Column(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(16.dp)
-                    .statusBarsPadding()
-                    .navigationBarsPadding()
-            ) {
-                // Header
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
+            Scaffold(floatingActionButton = {
+                androidx.compose.material3.FloatingActionButton(
+                    onClick = onAddExpenseClick,
+                    containerColor = MaterialTheme.colorScheme.primary,
+                    contentColor = MaterialTheme.colorScheme.onPrimary
                 ) {
-                    Column {
-                        Text(
-                            text = "Hello, ${account.name}!",
-                            style = MaterialTheme.typography.headlineMedium
-                        )
-                        Text(
-                            text = "Household: ${account.wgName}",
-                            style = MaterialTheme.typography.bodyLarge,
-                            color = Color.Gray
-                        )
-                    }
-                    Button(onClick = onBack) {
-                        Text("Switch")
-                    }
+                    Text("+", style = MaterialTheme.typography.headlineSmall)
                 }
-
-                Spacer(modifier = Modifier.height(5.dp))
-
-                Button(onClick = onDelete) {
-                    Text("Delete")
-                }
-
-                Spacer(modifier = Modifier.height(10.dp))
-
-                Text("Costs", style = MaterialTheme.typography.titleLarge)
-                Spacer(modifier = Modifier.height(8.dp))
-
-                if(expenseResource is Resource.Loading && expenseResource.data?.isEmpty() == true) {
-                    CircularProgressIndicator(modifier = Modifier.align(Alignment.CenterHorizontally))
-                }
-
-                if(expenseResource is Resource.Error) {
-                    Text("Error: ${expenseResource.message}", color = Color.Red)
-                }
-
-                LazyColumn(
+            }) { paddingValues ->
+                Column(
                     modifier = Modifier
                         .fillMaxSize()
-                        .background(MaterialTheme.colorScheme.surfaceVariant, shape = MaterialTheme.shapes.medium),
-                    contentPadding = PaddingValues(8.dp),
-                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                        .padding(paddingValues)
+                        .padding(16.dp)
+                        .statusBarsPadding()
+                        .navigationBarsPadding()
                 ) {
-                    items(expenseResource.data ?: emptyList()) { expense ->
-                        ExpenseItem(expense = expense, onClick = { onExpenseClick(expense) })
+                    // Header
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Column {
+                            Text(
+                                text = "Hello, ${account.name}!",
+                                style = MaterialTheme.typography.headlineMedium
+                            )
+                            Text(
+                                text = "Household: ${account.wgName}",
+                                style = MaterialTheme.typography.bodyLarge,
+                                color = Color.Gray
+                            )
+                        }
+                        Button(onClick = onBack) {
+                            Text("Switch")
+                        }
+                    }
+
+                    Spacer(modifier = Modifier.height(5.dp))
+
+                    Button(onClick = onDelete) {
+                        Text("Delete")
+                    }
+
+                    Spacer(modifier = Modifier.height(10.dp))
+
+                    Text("Costs", style = MaterialTheme.typography.titleLarge)
+                    Spacer(modifier = Modifier.height(8.dp))
+
+                    if(expenseResource is Resource.Loading && expenseResource.data?.isEmpty() == true) {
+                        CircularProgressIndicator(modifier = Modifier.align(Alignment.CenterHorizontally))
+                    }
+
+                    if(expenseResource is Resource.Error) {
+                        Text("Error: ${expenseResource.message}", color = Color.Red)
+                    }
+
+                    LazyColumn(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .background(MaterialTheme.colorScheme.surfaceVariant, shape = MaterialTheme.shapes.medium),
+                        contentPadding = PaddingValues(8.dp),
+                        verticalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        items(expenseResource.data ?: emptyList()) { expense ->
+                            ExpenseItem(expense = expense, onClick = { onExpenseClick(expense) })
+                        }
                     }
                 }
             }

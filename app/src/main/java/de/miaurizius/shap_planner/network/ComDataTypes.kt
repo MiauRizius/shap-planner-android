@@ -2,7 +2,6 @@ package de.miaurizius.shap_planner.network
 
 import de.miaurizius.shap_planner.entities.Expense
 import de.miaurizius.shap_planner.entities.ExpenseShare
-import de.miaurizius.shap_planner.entities.User
 
 // Login
 data class LoginRequest(val username: String, val password: String)
@@ -15,6 +14,8 @@ data class RefreshResponse(val access_token: String, val refresh_token: String)
 
 // Expenses
 data class ExpensesResponse(val expenses: List<Expense>)
+data class ExpenseCreationRequest(val expense: Expense, val shares: List<ExpenseShare>)
+data class ExpenseCreationResponse(val expense: Expense, val shares: List<ExpenseShare>)
 
 // ExpenseShares
 data class ExpenseSharesResponse(val shares: List<ExpenseShare>)

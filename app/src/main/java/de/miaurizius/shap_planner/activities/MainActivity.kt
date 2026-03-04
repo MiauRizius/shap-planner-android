@@ -8,11 +8,13 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import de.miaurizius.shap_planner.TokenStorage
 import de.miaurizius.shap_planner.UserPreferences
 import de.miaurizius.shap_planner.room.AppDatabase
 import de.miaurizius.shap_planner.ui.AppContent
 import de.miaurizius.shap_planner.ui.theme.ShapPlannerTheme
+import de.miaurizius.shap_planner.viewmodels.ExpenseCreationViewModel
 import de.miaurizius.shap_planner.viewmodels.ExpenseDetailViewModel
 import de.miaurizius.shap_planner.viewmodels.LoginViewModel
 import de.miaurizius.shap_planner.viewmodels.MainViewModel
@@ -36,6 +38,12 @@ class MainActivity : ComponentActivity() {
             database.expenseDao(),
             database.expenseShareDao(),
             database.userDao(),
+            tokenStorage
+        )
+        val creationViewModel = ExpenseCreationViewModel(
+            database.userDao(),
+            database.expenseDao(),
+            database.expenseShareDao(),
             tokenStorage
         )
 
@@ -67,7 +75,8 @@ class MainActivity : ComponentActivity() {
                     onSessionInvalid = { mainViewModel.logoutFromAccount() },
                     onExpenseClick = { expense -> println("Clicked: ${expense.title}") },
                     viewModel = mainViewModel,
-                    detailViewModel = detailViewModel
+                    detailViewModel = detailViewModel,
+                    creationViewModel = creationViewModel,
                 )
             }
         }

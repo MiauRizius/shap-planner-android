@@ -25,7 +25,7 @@ interface APIService {
     @GET("api/expenses")
     suspend fun expensesGet(@Header("Authorization") token: String): Response<ExpensesResponse>
     @POST("api/expenses")
-    suspend fun expenseCreate(@Header("Authorization") token: String)
+    suspend fun expenseCreate(@Header("Authorization") token: String, @Body req: ExpenseCreationRequest): Response<ExpenseCreationResponse>
     @PUT("api/expenses")
     suspend fun expenseUpdate(@Header("Authorization") token: String)
     @DELETE("api/expenses")
