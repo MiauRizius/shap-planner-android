@@ -1,12 +1,18 @@
 package de.miaurizius.shap_planner.ui
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import de.miaurizius.shap_planner.entities.Account
 import de.miaurizius.shap_planner.entities.Expense
 import de.miaurizius.shap_planner.network.SessionState
 import de.miaurizius.shap_planner.ui.screens.AccountSelectionScreen
 import de.miaurizius.shap_planner.ui.screens.DashboardScreen
+import de.miaurizius.shap_planner.ui.screens.ExpenseDetailScreen
 import de.miaurizius.shap_planner.ui.screens.LoginScreen
+import de.miaurizius.shap_planner.viewmodels.ExpenseDetailViewModel
 import de.miaurizius.shap_planner.viewmodels.MainViewModel
 
 @Composable
@@ -32,15 +38,26 @@ fun AppContent(
     onSessionInvalid: () -> Unit,
 
     //Important
-    viewModel: MainViewModel
+    viewModel: MainViewModel,
+    detailViewModel: ExpenseDetailViewModel
 ) {
+    var selectedExpense by remember { mutableStateOf<Expense?>(null) }
+
     when {
+        selectedExpense != null -> {
+            ExpenseDetailScreen(
+                expense = selectedExpense!!,
+                account = selectedAccount!!,
+                viewModel = detailViewModel,
+                onBack = { selectedExpense = null }
+            )
+        }
         showLoginForNewAccount -> LoginScreen(onLogin)
         accountList.isEmpty() -> LoginScreen(onLogin)
         selectedAccount != null -> DashboardScreen(
             // Data and regarding Methods
             account = selectedAccount,
-            onExpenseClick = onExpenseClick,
+            onExpenseClick = { selectedExpense = it },
 
             // Default Methods
             mainViewModel = viewModel,

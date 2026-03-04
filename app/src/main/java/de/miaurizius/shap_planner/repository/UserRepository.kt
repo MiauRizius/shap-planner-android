@@ -19,7 +19,8 @@ class UserRepository(
             try {
                 val response = api.userinfo("Bearer $token", userId)
                 if(response.isSuccessful) {
-                    response.body()?.user?.let { remoteUser -> dao.insertUser(remoteUser) }
+                    println("Body: ${response.body()}")
+                    response.body()?.let { remoteUser -> dao.insertUser(remoteUser) }
                 }
             } catch(e: Exception) {
                 emit(Resource.Error("Network-Error: ${e.localizedMessage}", cached))

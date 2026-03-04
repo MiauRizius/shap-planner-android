@@ -1,5 +1,7 @@
 package de.miaurizius.shap_planner.network
 
+import com.google.gson.annotations.SerializedName
+import de.miaurizius.shap_planner.entities.User
 import retrofit2.Response
 import retrofit2.http.Body
 import retrofit2.http.DELETE
@@ -34,8 +36,19 @@ interface APIService {
     suspend fun sharesGet(@Header("Authorization") token: String): Response<ExpenseSharesResponse>
     @GET("api/shares")
     suspend fun shareGet(@Header("Authorization") token: String, @Query("id") shareId: UUID): Response<ExpenseShareResponse>
+    @GET("api/shares")
+    suspend fun shareGet(@Header("Authorization") token: String, @Query("id") expenseId: UUID, @Query("idType") idType: IDType): Response<ExpenseSharesResponse>
 
     // User
     @GET("api/userinfo")
-    suspend fun userinfo(@Header("Authorization") token: String, @Query("id") userId: UUID): Response<UserinfoResponse>
+    suspend fun userinfo(@Header("Authorization") token: String, @Query("id") userId: UUID): Response<User>
+}
+
+enum class IDType {
+    @SerializedName("share")
+    Share,
+    @SerializedName("expense")
+    Expense,
+    @SerializedName("user")
+    User,
 }

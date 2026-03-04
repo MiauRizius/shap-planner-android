@@ -13,6 +13,7 @@ import de.miaurizius.shap_planner.UserPreferences
 import de.miaurizius.shap_planner.room.AppDatabase
 import de.miaurizius.shap_planner.ui.AppContent
 import de.miaurizius.shap_planner.ui.theme.ShapPlannerTheme
+import de.miaurizius.shap_planner.viewmodels.ExpenseDetailViewModel
 import de.miaurizius.shap_planner.viewmodels.LoginViewModel
 import de.miaurizius.shap_planner.viewmodels.MainViewModel
 
@@ -29,6 +30,12 @@ class MainActivity : ComponentActivity() {
         val mainViewModel = MainViewModel(
             accountDao,
             expenseDao,
+            tokenStorage
+        )
+        val detailViewModel = ExpenseDetailViewModel(
+            database.expenseDao(),
+            database.expenseShareDao(),
+            database.userDao(),
             tokenStorage
         )
 
@@ -59,7 +66,8 @@ class MainActivity : ComponentActivity() {
                     onValidateSession = { mainViewModel.validateSession(selectedAccount!!) },
                     onSessionInvalid = { mainViewModel.logoutFromAccount() },
                     onExpenseClick = { expense -> println("Clicked: ${expense.title}") },
-                    viewModel = mainViewModel
+                    viewModel = mainViewModel,
+                    detailViewModel = detailViewModel
                 )
             }
         }

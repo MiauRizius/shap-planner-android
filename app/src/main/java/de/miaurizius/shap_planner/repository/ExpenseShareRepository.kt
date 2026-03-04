@@ -1,8 +1,10 @@
 package de.miaurizius.shap_planner.repository
 
+import de.miaurizius.shap_planner.entities.Expense
 import de.miaurizius.shap_planner.entities.ExpenseShare
 import de.miaurizius.shap_planner.entities.ExpenseShareDao
 import de.miaurizius.shap_planner.network.APIService
+import de.miaurizius.shap_planner.network.IDType
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flow
@@ -49,5 +51,23 @@ class ExpenseShareRepository(
             if(share != null) emit(Resource.Success(share))
             else emit(Resource.Error("Share nicht gefunden", null))
         }
+    }
+
+    fun getSharesByExpenseId(token: String, expenseId: UUID, forceRefresh: Boolean = false): Flow<Resource<List<ExpenseShare>>> = flow {
+        val cached = dao.getSharesByExpense(expenseId).first()
+        emit(Resource.Loading(cached))
+        if(cached.isEmpty() || forceRefresh) {
+            try {
+                val response = api.shareGet("Bearer $token", expenseId, IDType.Expense)
+                if(response.isSuccessful) {
+                    println("Body: ${response.body()}")
+                    val remoteShare = response.body()?.shares ?: emptyList()
+                    remoteShare.forEach { dao.insertShare(it) }
+                }
+            } catch(e: Exception) {
+                emit(Resource.Error("Network Error: ${e.localizedMessage}", cached))
+            }
+        }
+        dao.getSharesByExpense(expenseId).collect { emit(Resource.Success(it)) }
     }
 }

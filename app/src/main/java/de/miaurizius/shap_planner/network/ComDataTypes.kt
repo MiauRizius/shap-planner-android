@@ -19,6 +19,3 @@ data class ExpensesResponse(val expenses: List<Expense>)
 // ExpenseShares
 data class ExpenseSharesResponse(val shares: List<ExpenseShare>)
 data class ExpenseShareResponse(val share: ExpenseShare)
-
-// User
-data class UserinfoResponse(val user: User)
