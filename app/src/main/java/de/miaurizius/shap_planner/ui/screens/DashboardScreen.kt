@@ -1,5 +1,6 @@
 package de.miaurizius.shap_planner.ui.screens
 
+import android.annotation.SuppressLint
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -83,29 +84,29 @@ fun DashboardScreen(
                 ) {
                     Column {
                         Text(
-                            text = "Hallo, ${account.name}!",
+                            text = "Hello, ${account.name}!",
                             style = MaterialTheme.typography.headlineMedium
                         )
                         Text(
-                            text = "WG: ${account.wgName}",
+                            text = "Household: ${account.wgName}",
                             style = MaterialTheme.typography.bodyLarge,
                             color = Color.Gray
                         )
                     }
                     Button(onClick = onBack) {
-                        Text("Wechseln")
+                        Text("Switch")
                     }
                 }
 
                 Spacer(modifier = Modifier.height(5.dp))
 
                 Button(onClick = onDelete) {
-                    Text("Löschen")
+                    Text("Delete")
                 }
 
                 Spacer(modifier = Modifier.height(10.dp))
 
-                Text("WG-Kosten", style = MaterialTheme.typography.titleLarge)
+                Text("Costs", style = MaterialTheme.typography.titleLarge)
                 Spacer(modifier = Modifier.height(8.dp))
 
                 if(expenseResource is Resource.Loading && expenseResource.data?.isEmpty() == true) {
@@ -113,7 +114,7 @@ fun DashboardScreen(
                 }
 
                 if(expenseResource is Resource.Error) {
-                    Text("Fehler: ${expenseResource.message}", color = Color.Red)
+                    Text("Error: ${expenseResource.message}", color = Color.Red)
                 }
 
                 LazyColumn(
@@ -142,6 +143,7 @@ fun DashboardScreen(
     }
 }
 
+@SuppressLint("DefaultLocale")
 @Composable
 fun ExpenseItem(expense: Expense, onClick: () -> Unit) {
     Surface(modifier = Modifier
@@ -151,7 +153,7 @@ fun ExpenseItem(expense: Expense, onClick: () -> Unit) {
         color = MaterialTheme.colorScheme.surface) {
         Row(modifier = Modifier.padding(16.dp), horizontalArrangement = Arrangement.SpaceBetween) {
             Text(text = expense.title, style = MaterialTheme.typography.bodyLarge)
-            Text(text = expense.amount.toString()+"€", style = MaterialTheme.typography.bodyLarge, fontWeight = FontWeight.Bold)
+            Text(text = String.format("%.2f€", expense.amount / 100.0), style = MaterialTheme.typography.bodyLarge, fontWeight = FontWeight.Bold)
         }
     }
 }

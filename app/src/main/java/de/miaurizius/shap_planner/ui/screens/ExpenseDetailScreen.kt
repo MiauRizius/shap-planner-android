@@ -36,6 +36,7 @@ import de.miaurizius.shap_planner.entities.Account
 import de.miaurizius.shap_planner.entities.Expense
 import de.miaurizius.shap_planner.viewmodels.ExpenseDetailViewModel
 
+@SuppressLint("DefaultLocale")
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ExpenseDetailScreen(
@@ -55,14 +56,14 @@ fun ExpenseDetailScreen(
             TopAppBar(
                 title = { Text(expense.title) },
                 navigationIcon = { IconButton(onClick = onBack) {
-                    Icon(Icons.AutoMirrored.Filled.ArrowBack, "Zurück")
+                    Icon(Icons.AutoMirrored.Filled.ArrowBack, "Back")
                 } }
             )
         }
     ) { padding ->
         Column(modifier = Modifier.padding(padding).padding(16.dp)) {
             Text(
-                text = "${expense.amount / 100.0}€",
+                text = String.format("%.2f€", expense.amount / 100.0),
                 style = MaterialTheme.typography.displayMedium,
                 fontWeight = FontWeight.Bold,
                 color = MaterialTheme.colorScheme.primary
@@ -73,12 +74,12 @@ fun ExpenseDetailScreen(
             HorizontalDivider(Modifier, DividerDefaults.Thickness, DividerDefaults.color)
             Spacer(modifier = Modifier.height(16.dp))
 
-            Text("Kostenaufteilung", style = MaterialTheme.typography.titleLarge)
+            Text("Cost Allocation", style = MaterialTheme.typography.titleLarge)
             Spacer(modifier = Modifier.height(8.dp))
 
             LazyColumn(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                 items(shares) { item ->
-                    ShareItem(item.user?.name ?: "Unbekannter Nutzer", item.share.share_cents)
+                    ShareItem(item.user?.name ?: "Unknown User", item.share.share_cents)
                 }
             }
         }

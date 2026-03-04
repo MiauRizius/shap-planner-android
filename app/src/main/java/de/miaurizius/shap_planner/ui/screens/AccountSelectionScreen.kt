@@ -43,7 +43,7 @@ fun AccountSelectionScreen(accounts: List<Account>, onAccountClick: (Account) ->
         verticalArrangement = Arrangement.spacedBy(12.dp)
     ) {
         item {
-            Text("Wähle einen Account", style = MaterialTheme.typography.headlineSmall)
+            Text("Choose an account", style = MaterialTheme.typography.headlineSmall)
         }
 
         items(accounts) { account ->
@@ -64,7 +64,7 @@ fun AccountSelectionScreen(accounts: List<Account>, onAccountClick: (Account) ->
                 onClick = onAddAccountClick,
                 modifier = Modifier.fillMaxWidth()
             ) {
-                Text("Anderen Account hinzufügen")
+                Text("Add account")
             }
         }
     }
