@@ -24,6 +24,8 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -32,13 +34,13 @@ import androidx.compose.ui.unit.dp
 import de.miaurizius.shap_planner.entities.Account
 import de.miaurizius.shap_planner.entities.Expense
 import de.miaurizius.shap_planner.network.SessionState
+import de.miaurizius.shap_planner.repository.Resource
 import de.miaurizius.shap_planner.viewmodels.MainViewModel
 
 @Composable
 fun DashboardScreen(
     // Data and regarding Methods
     account: Account,
-    expenses: List<Expense>,
     onExpenseClick: (Expense) -> Unit,
 
     // Default Methods
@@ -49,8 +51,10 @@ fun DashboardScreen(
     onValidate: () -> Unit,
     onSessionInvalid: () -> Unit) {
 
+    val expenseResource by mainViewModel.expenseResource.collectAsState()
+
     LaunchedEffect(Unit) { onValidate() }
-    mainViewModel.loadExpenses(account)
+    LaunchedEffect(account) { mainViewModel.loadExpenses(account, forceRefresh = false) }
     when (sessionState) {
         SessionState.Loading -> {
             Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
@@ -102,6 +106,14 @@ fun DashboardScreen(
                 Text("WG-Kosten", style = MaterialTheme.typography.titleLarge)
                 Spacer(modifier = Modifier.height(8.dp))
 
+                if(expenseResource is Resource.Loading && expenseResource.data?.isEmpty() == true) {
+                    CircularProgressIndicator(modifier = Modifier.align(Alignment.CenterHorizontally))
+                }
+
+                if(expenseResource is Resource.Error) {
+                    Text("Fehler: ${expenseResource.message}", color = Color.Red)
+                }
+
                 LazyColumn(
                     modifier = Modifier
                         .fillMaxSize()
@@ -109,7 +121,7 @@ fun DashboardScreen(
                     contentPadding = PaddingValues(8.dp),
                     verticalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
-                    items(expenses) { expense ->
+                    items(expenseResource.data ?: emptyList()) { expense ->
                         ExpenseItem(expense = expense, onClick = { onExpenseClick(expense) })
                     }
                 }

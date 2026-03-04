@@ -18,7 +18,6 @@ fun AppContent(
     onLogin: (String, String, String) -> Unit,
 
     // Expenses
-    expenses: List<Expense>,
     onExpenseClick: (Expense) -> Unit,
 
     // Account
@@ -41,7 +40,6 @@ fun AppContent(
         selectedAccount != null -> DashboardScreen(
             // Data and regarding Methods
             account = selectedAccount,
-            expenses = expenses,
             onExpenseClick = onExpenseClick,
 
             // Default Methods

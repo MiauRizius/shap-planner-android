@@ -23,9 +23,14 @@ class MainActivity : ComponentActivity() {
         val prefs = UserPreferences(this)
         val loginViewModel = LoginViewModel(prefs, applicationContext)
         val database = AppDatabase.getDatabase(applicationContext)
-        val dao = database.accountDao()
+        val accountDao = database.accountDao()
+        val expenseDao = database.expenseDao()
         val tokenStorage = TokenStorage(applicationContext)
-        val mainViewModel = MainViewModel(dao, tokenStorage)
+        val mainViewModel = MainViewModel(
+            accountDao,
+            expenseDao,
+            tokenStorage
+        )
 
 
         setContent {
@@ -33,7 +38,6 @@ class MainActivity : ComponentActivity() {
                 val accountList by mainViewModel.accounts.collectAsState()
                 val selectedAccount = mainViewModel.selectedAccount
                 val showLoginForNewAccount = remember { mutableStateOf(false) }
-                val expenses by mainViewModel.expenses.collectAsState()
 
                 BackHandler(enabled = showLoginForNewAccount.value && accountList.isNotEmpty()) {
                     showLoginForNewAccount.value = false
@@ -54,7 +58,6 @@ class MainActivity : ComponentActivity() {
                     sessionState = mainViewModel.sessionState,
                     onValidateSession = { mainViewModel.validateSession(selectedAccount!!) },
                     onSessionInvalid = { mainViewModel.logoutFromAccount() },
-                    expenses = expenses,
                     onExpenseClick = { expense -> println("Clicked: ${expense.title}") },
                     viewModel = mainViewModel
                 )

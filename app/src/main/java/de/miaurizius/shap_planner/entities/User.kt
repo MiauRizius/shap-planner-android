@@ -5,13 +5,14 @@ import androidx.room.Delete
 import androidx.room.Entity
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
+import androidx.room.PrimaryKey
 import androidx.room.Query
 import kotlinx.coroutines.flow.Flow
 import java.util.UUID
 
 @Entity(tableName = "users")
 data class User (
-    val id: UUID,
+    @PrimaryKey val id: UUID,
     val name: String,
     val avatar_url: String?
 )
