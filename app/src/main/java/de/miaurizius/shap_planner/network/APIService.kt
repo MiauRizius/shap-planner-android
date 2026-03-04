@@ -21,7 +21,7 @@ interface APIService {
 
     // Expenses
     @GET("api/expenses")
-    suspend fun expenseGet(@Header("Authorization") token: String): Response<ExpenseResponse>
+    suspend fun expensesGet(@Header("Authorization") token: String): Response<ExpensesResponse>
     @POST("api/expenses")
     suspend fun expenseCreate(@Header("Authorization") token: String)
     @PUT("api/expenses")
@@ -29,7 +29,13 @@ interface APIService {
     @DELETE("api/expenses")
     suspend fun expenseDelete(@Header("Authorization") token: String)
 
+    // Shares
+    @GET("api/shares")
+    suspend fun sharesGet(@Header("Authorization") token: String): Response<ExpenseSharesResponse>
+    @GET("api/shares")
+    suspend fun shareGet(@Header("Authorization") token: String, @Query("id") shareId: UUID): Response<ExpenseShareResponse>
+
     // User
     @GET("api/userinfo")
-    suspend fun userinfo(@Header("Authorization") token: String, @Query("id") userId: UUID)
+    suspend fun userinfo(@Header("Authorization") token: String, @Query("id") userId: UUID): Response<UserinfoResponse>
 }

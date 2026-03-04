@@ -24,7 +24,7 @@ interface ExpenseShareDao {
     fun getAllShares(): Flow<List<ExpenseShare>>
 
     @Query("SELECT * FROM expense_shares WHERE id = :shareId")
-    fun getShareById(shareId: UUID): Flow<ExpenseShare>
+    fun getShareById(shareId: UUID): Flow<ExpenseShare?>
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertShare(share: ExpenseShare)

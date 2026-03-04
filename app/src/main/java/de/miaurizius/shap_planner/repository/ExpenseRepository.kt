@@ -13,18 +13,15 @@ class ExpenseRepository(
 ) {
     fun getExpenses(token: String, forceRefresh: Boolean = false): Flow<Resource<List<Expense>>> = flow {
         val cachedExpense = dao.getAllExpenses().first()
-        println("CachedExpense: $cachedExpense")
         emit(Resource.Loading(cachedExpense))
 
         if(cachedExpense.isEmpty() || forceRefresh) {
             try {
-                val response = api.expenseGet("Bearer $token")
+                val response = api.expensesGet("Bearer $token")
                 if(response.isSuccessful) {
                     val remoteExpense = response.body()?.expenses ?: emptyList()
-                    println("Fetched expenses: $remoteExpense")
                     remoteExpense.forEach {
                         dao.insertExpense(it)
-                        println("Added $it")
                     }
                 }
             } catch(e: Exception) {
